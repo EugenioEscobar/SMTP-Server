@@ -1,22 +1,40 @@
-📧 API de Envío de Correos (SMTP con Fastify)
+# 📧 API de Envío de Correos (SMTP con Fastify)
 
 API backend simple para procesar formularios de contacto y enviar correos usando SMTP (por ejemplo, cPanel).
 
-🚀 Tecnologías
-Node.js
-Fastify
-Nodemailer
-Dotenv
-📁 Estructura del proyecto
+---
+
+## 🚀 Tecnologías
+
+- Node.js
+- Fastify
+- Nodemailer
+- Dotenv
+
+---
+
+## 📁 Estructura del proyecto
+
+
 backend/
 ├── server.js
 ├── package.json
 ├── .env
 └── .gitignore
-⚙️ Requisitos
-Node.js v18+ (recomendado usar nvm)
-Cuenta de correo SMTP (ej: cPanel)
-🔧 Instalación
+
+
+---
+
+## ⚙️ Requisitos
+
+- Node.js v18+ (recomendado usar nvm)
+- Cuenta de correo SMTP (ej: cPanel)
+
+---
+
+## 🔧 Instalación
+
+```bash
 npm install
 🔐 Variables de entorno
 
