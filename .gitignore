@@ -1,0 +1,36 @@
+# dependencias
+node_modules/
+
+# logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# entorno
+.env
+.env.*
+!.env.example
+
+# build frontend (Vite)
+dist/
+build/
+
+# sistema
+.DS_Store
+Thumbs.db
+
+# editor
+.vscode/
+.idea/
+
+# coverage / tests
+coverage/
+
+# nodemon cache
+.nodemon
+
+# archivos temporales
+*.tmp
+*.temp
