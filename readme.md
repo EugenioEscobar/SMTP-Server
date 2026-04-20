@@ -36,6 +36,8 @@ backend/
 
 ```bash
 npm install
+```
+
 🔐 Variables de entorno
 
 Crea un archivo .env en la raíz del proyecto:
