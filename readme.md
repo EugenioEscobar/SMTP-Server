@@ -42,11 +42,13 @@ npm install
 
 Crea un archivo .env en la raíz del proyecto:
 
+```bash
 SMTP_HOST=mail.tudominio.com
 SMTP_PORT=465
 SMTP_USER=contacto@tudominio.com
 SMTP_PASS=tu_password
 SMTP_TO=destino@tudominio.com
+```
 
 ⚠️ Nunca subas este archivo a GitHub.
 
