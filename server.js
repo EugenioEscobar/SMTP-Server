@@ -1,16 +1,17 @@
-import Fastify from 'fastify'
-import nodemailer from 'nodemailer'
-import dotenv from 'dotenv'
-import rateLimit from '@fastify/rate-limit'
-import z from 'zod'
+const Fastify = require('fastify')
+const nodemailer = require('nodemailer')
+const dotenv = require('dotenv')
+const rateLimit = require('@fastify/rate-limit')
+const { z } = require('zod')
 
 dotenv.config()
 
 const fastify = Fastify({ logger: true })
 
-await fastify.register(rateLimit, {
-  max: 5,                 // 5 requests
-  timeWindow: '1 minute', // por minuto
+// ✅ SIN await (clave en cPanel)
+fastify.register(rateLimit, {
+  max: 5,
+  timeWindow: '1 minute',
 })
 
 // Configurar transporter SMTP
@@ -28,10 +29,12 @@ const transporter = nodemailer.createTransport({
 fastify.post('/contacto', async (request, reply) => {
   const { nombre, email, mensaje, empresa, website } = request.body
 
+  // Honeypot
   if (website) {
     return reply.status(400).send({ error: 'Spam Detectado' })
   }
 
+  // Validación
   const schema = z.object({
     nombre: z.string().min(2),
     email: z.string().email(),
@@ -41,18 +44,17 @@ fastify.post('/contacto', async (request, reply) => {
 
   const parsed = schema.safeParse(request.body)
 
-  const mensajeHTML = mensaje.replace(/\n/g, '<br>')
-
   if (!parsed.success) {
     return reply.status(400).send({ error: 'Datos inválidos' })
   }
+
+  const mensajeHTML = mensaje.replace(/\n/g, '<br>')
 
   try {
     await transporter.sendMail({
       from: `"Web Contacto" <${process.env.SMTP_USER}>`,
       to: process.env.SMTP_TO,
       subject: 'Nuevo mensaje de contacto',
-
       html: `
         <div style="margin:0;padding:0;background:#0a0a0a;font-family:Arial,sans-serif;">
 
@@ -62,76 +64,45 @@ fastify.post('/contacto', async (request, reply) => {
 
                 <table width="600" cellpadding="0" cellspacing="0" style="background:#111;border-radius:8px;overflow:hidden;border:1px solid #1f1f1f;">
 
-                  <!-- HERO (imagen arriba) -->
                   <tr>
-                  <td style="
-                    background-image:url('https://images.unsplash.com/photo-1557683316-973673baf926');
-                    background-size:cover;
-                    background-position:center;
-                    height:160px;
-                  ">
-                    
-                    <table width="100%" height="160" cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td align="center" valign="middle" style="background:rgba(0,0,0,0.6);">
+                    <td style="
+                      background-image:url('https://images.unsplash.com/photo-1557683316-973673baf926');
+                      background-size:cover;
+                      background-position:center;
+                      height:160px;
+                    ">
+                      <table width="100%" height="160">
+                        <tr>
+                          <td align="center" valign="middle" style="background:rgba(0,0,0,0.6);">
+                            <h1 style="color:#d4af37;margin:0;font-size:24px;letter-spacing:3px;">
+                              EUGEDEV
+                            </h1>
+                            <p style="color:#ccc;font-size:12px;margin-top:8px;">
+                              Nuevo contacto desde tu web
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
 
-                          <h1 style="
-                            color:#d4af37;
-                            margin:0;
-                            font-size:24px;
-                            letter-spacing:3px;
-                          ">
-                            EUGEDEV
-                          </h1>
-
-                          <p style="
-                            color:#ccc;
-                            font-size:12px;
-                            margin-top:8px;
-                          ">
-                            Nuevo contacto desde tu web
-                          </p>
-
-                        </td>
-                      </tr>
-                    </table>
-
-                  </td>
-                </tr>
-
-                  <!-- CONTENIDO -->
                   <tr>
                     <td style="padding:30px;">
 
-                      <!-- CARD -->
                       <div style="background:#0d0d0d;padding:20px;border:1px solid #222;border-radius:6px;">
 
-                        <p style="color:#d4af37;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">
-                          Nombre
-                        </p>
-                        <p style="color:#fff;margin:0 0 15px 0;">
-                          ${nombre}
-                        </p>
+                        <p style="color:#d4af37;font-size:11px;text-transform:uppercase;">Nombre</p>
+                        <p style="color:#fff;margin-bottom:15px;">${nombre}</p>
 
-                        <p style="color:#d4af37;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">
-                          Email
-                        </p>
-                        <p style="color:#fff;margin:0 0 15px 0;">
-                          ${email}
-                        </p>
+                        <p style="color:#d4af37;font-size:11px;text-transform:uppercase;">Email</p>
+                        <p style="color:#fff;margin-bottom:15px;">${email}</p>
 
                         ${empresa ? `
-                        <p style="color:#d4af37;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">
-                          Empresa
-                        </p>
-                        <p style="color:#fff;margin:0 0 15px 0;">
-                          ${empresa}
-                        </p>
+                          <p style="color:#d4af37;font-size:11px;text-transform:uppercase;">Empresa</p>
+                          <p style="color:#fff;margin-bottom:15px;">${empresa}</p>
                         ` : ''}
 
-                        <p style="color:#d4af37;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">
-                          Mensaje
-                        </p>
+                        <p style="color:#d4af37;font-size:11px;text-transform:uppercase;">Mensaje</p>
 
                         <div style="
                           color:#ddd;
@@ -139,14 +110,12 @@ fastify.post('/contacto', async (request, reply) => {
                           background:#0a0a0a;
                           padding:15px;
                           border-left:3px solid #d4af37;
-                          border-radius:4px;
                         ">
                           ${mensajeHTML}
                         </div>
 
                       </div>
 
-                      <!-- CTA -->
                       <div style="text-align:center;margin-top:25px;">
                         <a href="mailto:${email}" 
                           style="
@@ -157,7 +126,6 @@ fastify.post('/contacto', async (request, reply) => {
                             text-decoration:none;
                             font-weight:bold;
                             font-size:12px;
-                            letter-spacing:1px;
                             border-radius:4px;
                           ">
                           RESPONDER
@@ -167,10 +135,9 @@ fastify.post('/contacto', async (request, reply) => {
                     </td>
                   </tr>
 
-                  <!-- FOOTER -->
                   <tr>
                     <td style="padding:20px;text-align:center;border-top:1px solid #1f1f1f;">
-                      <p style="color:#666;font-size:11px;margin:0;">
+                      <p style="color:#666;font-size:11px;">
                         eugedev.cl · Sistema de contacto
                       </p>
                     </td>
@@ -187,11 +154,12 @@ fastify.post('/contacto', async (request, reply) => {
     })
 
     return { message: "Correo enviado de forma exitosa" }
+
   } catch (error) {
     fastify.log.error(error)
     return reply.status(500).send({ error: 'Error enviando correo' })
   }
 })
 
-// Levantar servidor
-export default fastify
+// ✅ EXPORT para cPanel
+module.exports = fastify
