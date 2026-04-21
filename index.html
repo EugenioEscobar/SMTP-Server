@@ -1,60 +1,4 @@
-import Fastify from 'fastify'
-import nodemailer from 'nodemailer'
-import dotenv from 'dotenv'
-import rateLimit from '@fastify/rate-limit'
-import z from 'zod'
-
-dotenv.config()
-
-const fastify = Fastify({ logger: true })
-
-await fastify.register(rateLimit, {
-  max: 5,                 // 5 requests
-  timeWindow: '1 minute', // por minuto
-})
-
-// Configurar transporter SMTP
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: true,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-})
-
-// Ruta POST
-fastify.post('/contacto', async (request, reply) => {
-  const { nombre, email, mensaje, empresa, website } = request.body
-
-  if (website) {
-    return reply.status(400).send({ error: 'Spam Detectado' })
-  }
-
-  const schema = z.object({
-    nombre: z.string().min(2),
-    email: z.string().email(),
-    mensaje: z.string().min(10),
-    empresa: z.string().optional(),
-  })
-
-  const parsed = schema.safeParse(request.body)
-
-  const mensajeHTML = mensaje.replace(/\n/g, '<br>')
-
-  if (!parsed.success) {
-    return reply.status(400).send({ error: 'Datos inválidos' })
-  }
-
-  try {
-    await transporter.sendMail({
-      from: `"Web Contacto" <${process.env.SMTP_USER}>`,
-      to: process.env.SMTP_TO,
-      subject: 'Nuevo mensaje de contacto',
-
-      html: `
-        <div style="margin:0;padding:0;background:#0a0a0a;font-family:Arial,sans-serif;">
+<div style="margin:0;padding:0;background:#0a0a0a;font-family:Arial,sans-serif;">
 
           <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;padding:40px 0;">
             <tr>
@@ -64,40 +8,25 @@ fastify.post('/contacto', async (request, reply) => {
 
                   <!-- HERO (imagen arriba) -->
                   <tr>
-                  <td style="
-                    background-image:url('https://images.unsplash.com/photo-1557683316-973673baf926');
-                    background-size:cover;
-                    background-position:center;
-                    height:160px;
-                  ">
-                    
-                    <table width="100%" height="160" cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td align="center" valign="middle" style="background:rgba(0,0,0,0.6);">
-
-                          <h1 style="
-                            color:#d4af37;
-                            margin:0;
-                            font-size:24px;
-                            letter-spacing:3px;
-                          ">
+                    <td style="
+                      background-image:url('https://images.unsplash.com/photo-1557683316-973673baf926');
+                      background-size:cover;
+                      background-position:center;
+                      height:160px;
+                      text-align:center;
+                    ">
+                      <div style="background:rgba(0,0,0,0.6);height:160px;display:flex;align-items:center;justify-content:center;">
+                        <div>
+                          <h1 style="color:#d4af37;margin:0;font-size:24px;letter-spacing:3px;">
                             EUGEDEV
                           </h1>
-
-                          <p style="
-                            color:#ccc;
-                            font-size:12px;
-                            margin-top:8px;
-                          ">
+                          <p style="color:#ccc;font-size:12px;margin-top:8px;">
                             Nuevo contacto desde tu web
                           </p>
-
-                        </td>
-                      </tr>
-                    </table>
-
-                  </td>
-                </tr>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
 
                   <!-- CONTENIDO -->
                   <tr>
@@ -183,25 +112,3 @@ fastify.post('/contacto', async (request, reply) => {
           </table>
 
         </div>
-      `
-    })
-
-    return { message: "Correo enviado de forma exitosa" }
-  } catch (error) {
-    fastify.log.error(error)
-    return reply.status(500).send({ error: 'Error enviando correo' })
-  }
-})
-
-// Levantar servidor
-const start = async () => {
-  try {
-    await fastify.listen({ port: 3000, host: '0.0.0.0' })
-    console.log('Servidor corriendo en http://localhost:3000')
-  } catch (err) {
-    fastify.log.error(err)
-    process.exit(1)
-  }
-}
-
-start()
