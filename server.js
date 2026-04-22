@@ -207,7 +207,7 @@ app.post('/contacto', async (req, res) => {
 })
 
 // Health check
-app.get('/', (req, res) => {
+app.get('/contacto', (req, res) => {
   res.send('API OK')
 })
 
