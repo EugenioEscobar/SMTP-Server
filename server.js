@@ -3,6 +3,7 @@ const nodemailer = require('nodemailer')
 const dotenv = require('dotenv')
 const rateLimit = require('express-rate-limit')
 const { z } = require('zod')
+const cors = require('cors')
 
 dotenv.config()
 
@@ -10,6 +11,15 @@ const app = express()
 
 // 🔴 IMPORTANTE en cPanel
 app.set('trust proxy', 1)
+
+app.use(cors({
+  origin: [
+    'http://localhost:5173',   // desarrollo (Vite)
+    'https://eugedev.cl'       // producción
+  ],
+  methods: ['POST'],
+  allowedHeaders: ['Content-Type']
+}))
 
 app.use(express.json())
 
