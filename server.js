@@ -211,7 +211,11 @@ app.get('/', (req, res) => {
   res.send('API OK')
 })
 
-// ❌ NO USAR EN CPANEL
-// app.listen(3000)
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
 
+  app.listen(PORT, () => {
+    console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  });
+}
 module.exports = app
