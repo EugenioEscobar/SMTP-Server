@@ -12,20 +12,14 @@ const app = express()
 // 🔴 IMPORTANTE en cPanel
 app.set('trust proxy', 1)
 
-const corsOptions = {
+app.use(cors({
   origin: [
-    'http://localhost:5173',
-    'https://eugedev.cl'
+    'http://localhost:5173',   // desarrollo (Vite)
+    'https://eugedev.cl'       // producción
   ],
-  methods: ['GET', 'POST', 'OPTIONS'],
+  methods: ['POST'],
   allowedHeaders: ['Content-Type']
-}
-
-// 🔴 ESTO ES CLAVE
-app.use(cors(corsOptions))
-
-// 🔴 ESTO SOLUCIONA EL PREFLIGHT
-app.options('*', cors(corsOptions))
+}))
 
 app.use(express.json())
 
