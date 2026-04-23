@@ -43,7 +43,7 @@ const transporter = nodemailer.createTransport({
 })
 
 // Ruta POST
-app.post('/contacto', async (req, res) => {
+app.post('/apiEmail/contacto', async (req, res) => {
   const { nombre, email, mensaje, empresa, website } = req.body
 
   // Honeypot
@@ -217,7 +217,7 @@ app.post('/contacto', async (req, res) => {
 })
 
 // Health check
-app.get('/contacto', (req, res) => {
+app.get('/apiEmail/contacto', (req, res) => {
   res.send('API OK')
 })
 
